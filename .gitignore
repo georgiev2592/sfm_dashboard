@@ -1,2 +1,7 @@
 *DS_STORE
 history.yml
+
+.env
+
+log/*
+tmp/*

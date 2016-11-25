@@ -1,0 +1,30 @@
+<% content_for :title do %>Dashboard | SFM<% end %>
+<div class="gridster">
+  <ul>
+    <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
+      <div data-id="humidity" data-view="Graph" data-title="Humidity" data-suffix="%" data-moreinfo="Update interval: 1 hour" style="background-color:#ff9618"></div>
+    </li>
+    
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="current_humidity" data-view="Meter" data-title="Current Humidity" data-height="200" data-width="200" data-min="0" data-max="100" data-suffix="%"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="clock" data-view="Clock" data-title="Current Time"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="current_temperature" data-view="Number" data-title="Current Temperature" data-suffix="°C"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
+      <div data-id="temperature" data-view="Graph" data-title="Temperature" data-suffix="°C" data-moreinfo="Update interval: 1 hour" style="background-color:#ff9618"></div>
+    </li>
+   
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="weather" data-view="Weather"></div>
+    </li>
+
+
+  </ul>
+ </div>
