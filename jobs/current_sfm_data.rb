@@ -1,12 +1,12 @@
 current_temperature = 0
 current_humidity = 0
 
-SCHEDULER.every '2s', :first_in => 0 do |job|
+SCHEDULER.every '3s', :first_in => 0 do |job|
   last_temperature = current_temperature
   last_humidity = current_humidity
 
   # mysql connection
-  db = Mysql2::Client.new(host: "localhost", username: "root", password: "root", database: "sfm")
+  db = Mysql2::Client.new(host: "localhost", username: "sfmuser", password: "password", database: "sfm")
 
   # mysql query
   sql = "SELECT * FROM Data ORDER BY created_at DESC LIMIT 1"

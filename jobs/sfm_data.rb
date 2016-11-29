@@ -6,7 +6,7 @@ humidities = []
 
 10.downto(1) do |i|
   # mysql connection
-  db = Mysql2::Client.new(host: "localhost", username: "root", password: "root", database: "sfm")
+  db = Mysql2::Client.new(host: "localhost", username: "sfmuser", password: "password", database: "sfm")
 
   # mysql query
   sql = "SELECT * FROM Data WHERE created_at < NOW() - INTERVAL " + i.to_s + " HOUR ORDER BY created_at DESC LIMIT 1"

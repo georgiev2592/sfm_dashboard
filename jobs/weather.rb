@@ -7,7 +7,7 @@ CITY_ID = 5392323
 UNITS   = 'metric'
 
 # create free account on open weather map to get API key
-API_KEY = ENV['WEATHER_KEY']
+API_KEY = 'd2c4250834ef4c2cbf4edf760bd7f768'
 
 SCHEDULER.every '10m', :first_in => 0 do |job|
 
