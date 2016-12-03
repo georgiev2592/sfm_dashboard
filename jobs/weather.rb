@@ -19,12 +19,19 @@ SCHEDULER.every '10m', :first_in => 0 do |job|
   weather_data  = JSON.parse(response.body)
   detailed_info = weather_data['weather'].first
   current_temp  = weather_data['main']['temp'].to_f.round
+  current_temp_cp = current_temp * 1.8 + 32
 
-send_event('weather', {     temp: "#{current_temp} &deg;#{temperature_units}",
+send_event('cp_weather', {     temp: "#{current_temp_cp.round} &deg;F",
                             condition: detailed_info['main'],
                             title: "#{weather_data['name']} Weather",
                             color: color_temperature(current_temp),
                             climacon: climacon_class(detailed_info['id'])})
+send_event('pr_weather', {     temp: "#{current_temp} &deg;#{temperature_units}",
+                            condition: detailed_info['main'],
+                            title: "#{weather_data['name']} Weather",
+                            color: color_temperature(current_temp),
+                            climacon: climacon_class(detailed_info['id'])})
+
 end
 
 
