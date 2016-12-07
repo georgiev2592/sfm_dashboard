@@ -6,7 +6,7 @@ humidities_cp = []
 temperatures_pr = []
 humidities_pr = []
 
-def initialize_arr(table_name, units)
+def initialize_arr(table_name, units, temperatures, humidities)
   10.downto(1) do |i|
     # mysql connection
     db = Mysql2::Client.new(host: "localhost", username: "sfmuser", password: "password", database: "sfm")
@@ -27,8 +27,8 @@ def initialize_arr(table_name, units)
   return temperatures, humidities
 end
 
-temperatures_cp, humidities_cp = initialize_arr("Data", 'f')
-temperatures_pr, humidities_pr = initialize_arr("PeterRoom", 'c')
+temperatures_cp, humidities_cp = initialize_arr("Data", 'f', temperatures_cp, humidities_cp)
+temperatures_pr, humidities_pr = initialize_arr("PeterRoom", 'c', temperatures_pr, humidities_pr)
 
 SCHEDULER.every '1h', :first_in => 0 do |job|
 
@@ -47,8 +47,11 @@ SCHEDULER.every '1h', :first_in => 0 do |job|
 end
 
 def update_arr(table_name, units, temperatures, humidities)
+  # mysql connection
+  db = Mysql2::Client.new(host: "localhost", username: "sfmuser", password: "password", database: "sfm")
+
   # mysql query
-  sql = "SELECT * FROM " + table_name + "ORDER BY created_at DESC LIMIT 1"
+  sql = "SELECT * FROM " + table_name + " ORDER BY created_at DESC LIMIT 1"
 
   # execute the query
   results = db.query(sql)
