@@ -31,40 +31,21 @@ end
 current_temp_avg, current_hum_avg = update_current_vals(0, 0, "Data")
 
 SCHEDULER.every '1m', :first_in => 0 do |job|
-  last_temp_avg = current_temp_avg_cp
-  last_hum_avg = current_hum_avg_cp
+  last_temp_avg = current_temp_avg
+  last_hum_avg = current_hum_avg
 
-  # mysql connection
-  db = Mysql2::Client.new(host: "localhost", username: "sfmuser", password: "password", database: "sfm")
+  current_temp_avg, current_hum_avg = update_current_vals(0, 0, "Data")
 
-  # mysql query
-  sql = "SELECT * FROM Data WHERE created_at BETWEEN NOW() - INTERVAL 30 SECOND AND NOW() ORDER BY created_at"
-
-  # execute the query
-  results = db.query(sql)
-  count = 0
-
-  results.map do |row|
-    current_temp_avg_cp += row['temp_f'].to_f
-    current_hum_avg_cp += row['humidity'].to_f
-    count += 1
-  end
-  
-  current_temp_avg_cp /= count
-  current_hum_avg_cp /= count
- 
-  db.close()
-
-  if (current_temp_avg_cp - last_temp_avg) / last_temp_avg > 0.1
+  if (current_temp_avg - last_temp_avg) / last_temp_avg > 0.1
     send_email('temperature')
   end
 
-  if (current_hum_avg_cp - last_hum_avg) / last_hum_avg > 0.1
+  if (current_hum_avg - last_hum_avg) / last_hum_avg > 0.1
     send_email('humidity')
   end
 
-  puts "Current avg temp: " + current_temp_avg_cp.to_s + " VS Last avg temp: " + last_temp_avg.to_s
-  puts "Current avg hum: " + current_hum_avg_cp.to_s + " VS Last avg hum: " + last_hum_avg.to_s
+  puts "Current avg temp: " + current_temp_avg.to_s + " VS Last avg temp: " + last_temp_avg.to_s
+  puts "Current avg hum: " + current_hum_avg.to_s + " VS Last avg hum: " + last_hum_avg.to_s
 end
 
 def send_email(type)
