@@ -1,9 +1,13 @@
 
 sfm_dashboard
-> HTTP Server on Ruby Sinatra
-===
+====
+
+> HTTP Server on Ruby Sinatra 
 
 Check out http://shopify.github.com/dashing for more information.
+
+### Demo
+http://sfmhub.xyz/calpoly
 
 ### Getting Started
 
@@ -25,8 +29,12 @@ $ bundle install
 $ sudo dashing start [-p 80] [-d] [-e development] [-e production]
 ```
 
-> Flags:
+Flags:
 
 	p: specify port
 	d: run in the background as a service
 	e: specify environment [development/production]
+
+### Check Your Browser
+
+http://localhost:80/calpoly
