@@ -1,5 +1,33 @@
 require 'pony'
 
+def update_current_vals(temp, hum, table_name)
+  current_temp_avg = temp
+  current_hum_avg = hum
+  count = 0
+   
+  # mysql connection
+  db = Mysql2::Client.new(host: "localhost", username: "sfmuser", password: "password", database: "sfm")
+
+  # mysql query
+  sql = "SELECT * FROM " + table_name + " WHERE created_at BETWEEN NOW() - INTERVAL 30 SECOND AND NOW() ORDER BY created_at"
+
+  # execute the query
+  results = db.query(sql)
+
+  results.map do |row|
+    current_temp_avg += row['temp_f'].to_f
+    current_hum_avg += row['humidity'].to_f
+    count += 1
+  end
+
+  current_temp_avg /= count
+  current_hum_avg /= count
+
+  db.close
+
+  return current_temp_avg, current_hum_avg
+end
+
 current_temp_avg, current_hum_avg = update_current_vals(0, 0, "Data")
 
 SCHEDULER.every '1m', :first_in => 0 do |job|
@@ -57,32 +85,4 @@ def send_email(type)
       :domain               => "localhost.localdomain" 
       }
     )
-end
-
-def update_current_vals(temp, hum, table_name)
-  current_temp_avg = temp
-  current_hum_avg = hum
-  count = 0
-   
-  # mysql connection
-  db = Mysql2::Client.new(host: "localhost", username: "sfmuser", password: "password", database: "sfm")
-
-  # mysql query
-  sql = "SELECT * FROM " + table_name + " WHERE created_at BETWEEN NOW() - INTERVAL 30 SECOND AND NOW() ORDER BY created_at"
-
-  # execute the query
-  results = db.query(sql)
-
-  results.map do |row|
-    current_temp_avg += row['temp_f'].to_f
-    current_hum_avg += row['humidity'].to_f
-    count += 1
-  end
-
-  current_temp_avg /= count
-  current_hum_avg /= count
-
-  db.close
-
-  return current_temp_avg, current_hum_avg
 end
