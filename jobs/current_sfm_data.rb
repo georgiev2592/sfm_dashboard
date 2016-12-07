@@ -4,11 +4,11 @@ current_temperature_pr = 0
 current_humidity_pr = 0
 
 SCHEDULER.every '3s', :first_in => 0 do |job|
-  current_temperature_cp, current_humidity_cp = update_currents('cp', "Data", current_temperature_cp, current_humidity_cp)
-  current_temperature_pr, current_humidity_pr = update_currents('pr', "PeterRoom", current_temperature_pr, current_humidity_pr)
+  current_temperature_cp, current_humidity_cp = update_currents('cp', "Data", current_temperature_cp, current_humidity_cp, 'f')
+  current_temperature_pr, current_humidity_pr = update_currents('pr', "PeterRoom", current_temperature_pr, current_humidity_pr, 'c')
 end
 
-def update_currents(prefix, table_name, current_temperature, current_humidity)
+def update_currents(prefix, table_name, current_temperature, current_humidity, units)
   last_temperature = current_temperature
   last_humidity = current_humidity
 
@@ -23,7 +23,7 @@ def update_currents(prefix, table_name, current_temperature, current_humidity)
   
   # sending to List widget, so map to :label and :value
   results.map do |row|
-     current_temperature = row['temp_f']
+     current_temperature = row['temp_' + units]
      current_humidity = row['humidity']
   end
 
