@@ -35,6 +35,11 @@ Flags:
 	d: run in the background as a service
 	e: specify environment [development/production]
 
+### Stop Server
+```
+$ sudo dashing stop
+```
+
 ### Check Your Browser
 
 http://localhost:80/calpoly

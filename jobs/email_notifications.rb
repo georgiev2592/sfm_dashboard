@@ -1,10 +1,10 @@
 require 'pony'
 
-def update_current_vals(temp, hum, table_name)
+def update_current_vals(table_name)
   last_entry_at = nil
-  current_temp_avg = temp
-  current_hum_avg = hum
-  count = 0
+  current_temp_avg = 0
+  current_hum_avg = 0
+  #count = 0
    
   # mysql connection
   db = Mysql2::Client.new(host: "localhost", username: "sfmuser", password: "password", database: "sfm")
@@ -43,8 +43,8 @@ def update_current_vals(temp, hum, table_name)
   return current_temp_avg, current_hum_avg, last_entry_at
 end
 
-current_temp_avg_cp, current_hum_avg_cp, last_entry_at_cp = update_current_vals(0, 0, "Data")
-current_temp_avg_pr, current_hum_avg_pr, last_entry_at_pr = update_current_vals(0, 0, "PeterRoom")
+current_temp_avg_cp, current_hum_avg_cp, last_entry_at_cp = update_current_vals("Data")
+current_temp_avg_pr, current_hum_avg_pr, last_entry_at_pr = update_current_vals("PeterRoom")
 
 SCHEDULER.every '1m', :first_in => 0 do |job|
   check_current_vals("Data", current_temp_avg_cp, current_hum_avg_cp, last_entry_at_cp, "waylinw@gmail.com")
@@ -55,7 +55,7 @@ def check_current_vals(table_name, current_temp_avg, current_hum_avg, last_entry
   last_temp_avg = current_temp_avg
   last_hum_avg = current_hum_avg
 
-  current_temp_avg, current_hum_avg = update_current_vals(current_temp_avg, current_hum_avg, table_name)
+  current_temp_avg, current_hum_avg, last_entry_at = update_current_vals(table_name)
   
   puts "Cur avg temp: " + current_temp_avg.to_s + " Last avg temp: " + last_temp_avg.to_s
   puts "Cur avg hum: " +  current_hum_avg.to_s +  " Last avg temp: " +  last_hum_avg.to_s
