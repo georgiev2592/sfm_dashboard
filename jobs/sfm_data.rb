@@ -6,37 +6,29 @@ humidities_cp = []
 temperatures_pr = []
 humidities_pr = []
 
+def initialize_arr(table_name, units)
+  10.downto(1) do |i|
+    # mysql connection
+    db = Mysql2::Client.new(host: "localhost", username: "sfmuser", password: "password", database: "sfm")
 
-10.downto(1) do |i|
-  # mysql connection
-  db = Mysql2::Client.new(host: "localhost", username: "sfmuser", password: "password", database: "sfm")
+    # mysql query
+    sql = "SELECT * FROM " + table_name + " WHERE created_at < NOW() - INTERVAL " + i.to_s + " HOUR ORDER BY created_at DESC LIMIT 1"
 
-  # mysql query
-  sql = "SELECT * FROM Data WHERE created_at < NOW() - INTERVAL " + i.to_s + " HOUR ORDER BY created_at DESC LIMIT 1"
-
-  # execute the query
-  results = db.query(sql)
-  
-  results.map do |row|
-    local_time = row['created_at'].to_time.strftime('%s').to_i - 8 * 60 * 60
-    temperatures_cp << {x: local_time, y: row['temp_f']}
-    humidities_cp << {x: local_time, y: row['humidity']}
-  end 
-
-  # mysql query
-  sql = "SELECT * FROM PeterRoom WHERE created_at < NOW() - INTERVAL " + i.to_s + " HOUR ORDER BY created_at DESC LIMIT 1"
-
-  # execute the query
-  results = db.query(sql)
-  
-  results.map do |row|
-    local_time = row['created_at'].to_time.strftime('%s').to_i - 8 * 60 * 60
-    temperatures_pr << {x: local_time, y: row['temp_c']}
-    humidities_pr << {x: local_time, y: row['humidity']}
-  end 
-
-  db.close()
+    # execute the query
+    results = db.query(sql)
+    
+    results.map do |row|
+      local_time = row['created_at'].to_time.strftime('%s').to_i - 8 * 60 * 60
+      temperatures << {x: local_time, y: row['temp_' + units]}
+      humidities << {x: local_time, y: row['humidity']}
+    end 
+    db.close()
+  end
+  return temperatures, humidities
 end
+
+temperatures_cp, humidities_cp = initialize_arr("Data", 'f')
+temperatures_pr, humidities_pr = initialize_arr("PeterRoom", 'c')
 
 SCHEDULER.every '1h', :first_in => 0 do |job|
 
@@ -45,40 +37,30 @@ SCHEDULER.every '1h', :first_in => 0 do |job|
   temperatures_pr.shift
   humidities_pr.shift
   
-
-  # mysql connection
-  db = Mysql2::Client.new(host: "localhost", username: "root", password: "root", database: "sfm")
-
-  # mysql query
-  sql = "SELECT * FROM Data ORDER BY created_at DESC LIMIT 1"
-
-  # execute the query
-  results = db.query(sql)
-  
-  # sending to List widget, so map to :label and :value
-  results.map do |row|
-     local_time = row['created_at'].to_time.strftime('%s').to_i - 8 * 60 * 60
-     temperatures_cp << {x: local_time, y: row['temp_f']}
-     humidities_cp << {x: local_time, y: row['humidity']}
-  end
-
-  # mysql query
-  sql = "SELECT * FROM PeterRoom ORDER BY created_at DESC LIMIT 1"
-
-  # execute the query
-  results = db.query(sql)
-  
-  # sending to List widget, so map to :label and :value
-  results.map do |row|
-     local_time = row['created_at'].to_time.strftime('%s').to_i - 8 * 60 * 60
-     temperatures_pr << {x: local_time, y: row['temp_c']}
-     humidities_pr << {x: local_time, y: row['humidity']}
-  end
-  
-  db.close()
+  temperatures_cp, humidities_cp = update_arr("Data", 'f', temperatures_cp, humidities_cp)
+  temperatures_pr, humidities_pr = update_arr("PeterRoom", 'c', temperatures_pr, humidities_pr)
   
   send_event('cp_temperature', points: temperatures_cp)
   send_event('cp_humidity', points: humidities_cp)
   send_event('pr_temperature', points: temperatures_pr)
   send_event('pr_humidity', points: humidities_pr)
+end
+
+def update_arr(table_name, units, temperatures, humidities)
+  # mysql query
+  sql = "SELECT * FROM " + table_name + "ORDER BY created_at DESC LIMIT 1"
+
+  # execute the query
+  results = db.query(sql)
+  
+  # sending to List widget, so map to :label and :value
+  results.map do |row|
+     local_time = row['created_at'].to_time.strftime('%s').to_i - 8 * 60 * 60
+     temperatures << {x: local_time, y: row['temp_' + units]}
+     humidities << {x: local_time, y: row['humidity']}
+  end
+  
+  db.close()
+
+  return temperatures, humidities
 end
