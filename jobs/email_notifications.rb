@@ -44,12 +44,10 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
     send_email('humidity')
   end
 
-  puts "Current avg temp: " + current_temp_avg.to_s + " VS Last avg temp: " + last_temp_avg.to_s
-  puts "Current avg hum: " + current_hum_avg.to_s + " VS Last avg hum: " + last_hum_avg.to_s
 end
 
 def send_email(type)
-  body =  "We've noticed that for the past 30 seconds the average " + type + "  has increased by more than 10%.\n\nPlease check make sure your location is safe!\n\nThank,\nSFM Team"
+  body =  "We've noticed that for the past 30 seconds the average " + type + "  has increased by more than 10%.\n\nPlease check make sure your location is safe!\n\nThanks,\nSFM Team"
     
   Pony.mail(
     :to => "georgiev2592@gmail.com",
