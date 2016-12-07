@@ -28,9 +28,15 @@ def update_current_vals(temp, hum, table_name)
   return current_temp_avg, current_hum_avg
 end
 
-current_temp_avg, current_hum_avg = update_current_vals(0, 0, "Data")
+current_temp_avg_cp, current_hum_avg_cp = update_current_vals(0, 0, "Data")
+current_temp_avg_pr, current_hum_avg_pr = update_current_vals(0, 0, "PeterRoom")
 
 SCHEDULER.every '1m', :first_in => 0 do |job|
+  check_current_vals(current_temp_avg_cp, current_hum_avg_cp)
+  check_current_vals(current_temp_avg_pr, current_hum_avg_pr)
+end
+
+def check_current_vals(current_temp_avg, current_hum_avg)
   last_temp_avg = current_temp_avg
   last_hum_avg = current_hum_avg
 
@@ -43,7 +49,6 @@ SCHEDULER.every '1m', :first_in => 0 do |job|
   if (current_hum_avg - last_hum_avg) / last_hum_avg > 0.1
     send_email('humidity')
   end
-
 end
 
 def send_email(type)
