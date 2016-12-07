@@ -1,6 +1,7 @@
 require 'pony'
 
 def update_current_vals(temp, hum, table_name)
+  last_entry_at = nil
   current_temp_avg = temp
   current_hum_avg = hum
   count = 0
@@ -23,39 +24,57 @@ def update_current_vals(temp, hum, table_name)
   current_temp_avg /= count
   current_hum_avg /= count
 
+  # mysql query
+  sql = "SELECT * FROM " + table_name + " WHERE created_at BETWEEN NOW() - INTERVAL 30 MINUTE AND NOW() ORDER BY created_at DESC LIMIT 1"
+
+  # execute the query
+  results = db.query(sql)
+
+  results.map do |row|
+    last_entry_at = row['created_at']
+  end
+
   db.close
 
-  return current_temp_avg, current_hum_avg
+  return current_temp_avg, current_hum_avg, last_entry_at
 end
 
-current_temp_avg_cp, current_hum_avg_cp = update_current_vals(0, 0, "Data")
-current_temp_avg_pr, current_hum_avg_pr = update_current_vals(0, 0, "PeterRoom")
+current_temp_avg_cp, current_hum_avg_cp, last_entry_at_cp = update_current_vals(0, 0, "Data")
+current_temp_avg_pr, current_hum_avg_pr, last_entry_at_pr = update_current_vals(0, 0, "PeterRoom")
 
 SCHEDULER.every '1m', :first_in => 0 do |job|
-  check_current_vals(current_temp_avg_cp, current_hum_avg_cp)
-  check_current_vals(current_temp_avg_pr, current_hum_avg_pr)
+  check_current_vals(current_temp_avg_cp, current_hum_avg_cp, last_entry_at_cp, "junkmail2592@gmail.com")
+  check_current_vals(current_temp_avg_pr, current_hum_avg_pr, last_entry_at_pr, "georgiev2592@gmail.com")
 end
 
-def check_current_vals(current_temp_avg, current_hum_avg)
+def check_current_vals(current_temp_avg, current_hum_avg, last_entry_at, send_to)
   last_temp_avg = current_temp_avg
   last_hum_avg = current_hum_avg
 
   current_temp_avg, current_hum_avg = update_current_vals(0, 0, "Data")
 
   if (current_temp_avg - last_temp_avg) / last_temp_avg > 0.1
-    send_email('temperature')
+    send_email('temperature', send_to)
   end
 
   if (current_hum_avg - last_hum_avg) / last_hum_avg > 0.1
-    send_email('humidity')
+    send_email('humidity', send_to)
+  end
+
+  if !last_entry_at
+    send_email('pi', send_to)
   end
 end
 
-def send_email(type)
-  body =  "We've noticed that for the past 30 seconds the average " + type + "  has increased by more than 10%.\n\nPlease check make sure your location is safe!\n\nThanks,\nSFM Team"
-    
+def send_email(type, send_to)
+  if type == 'pi'
+    body = "We noticed that the Raspberry Pi has been offline for more 30 minutes.\n\nPlease ensure equipment integrity.\n\nThanks,\nSFM Team\n"  
+  else 
+    body =  "We noticed that for the past 30 seconds the average " + type + "  has increased by more than 10%.\n\nPlease check make sure your location is safe!\n\nThanks,\nSFM Team\n"
+  end 
+  
   Pony.mail(
-    :to => "georgiev2592@gmail.com",
+    :to => send_to,
     :subject => "Notification Email | SFM",
     :body => body,
     :via => :smtp,
