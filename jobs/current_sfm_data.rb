@@ -3,11 +3,6 @@ current_humidity_cp = 0
 current_temperature_pr = 0
 current_humidity_pr = 0
 
-SCHEDULER.every '3s', :first_in => 0 do |job|
-  current_temperature_cp, current_humidity_cp = update_currents('cp', "Data", current_temperature_cp, current_humidity_cp, 'f')
-  current_temperature_pr, current_humidity_pr = update_currents('pr', "PeterRoom", current_temperature_pr, current_humidity_pr, 'c')
-end
-
 def update_currents(prefix, table_name, current_temperature, current_humidity, units)
   last_temperature = current_temperature
   last_humidity = current_humidity
@@ -34,4 +29,11 @@ def update_currents(prefix, table_name, current_temperature, current_humidity, u
 
   return current_temperature, current_humidity
 end
+
+
+SCHEDULER.every '3s', :first_in => 0 do |job|
+  current_temperature_cp, current_humidity_cp = update_currents('cp', "Data", current_temperature_cp, current_humidity_cp, 'f')
+  current_temperature_pr, current_humidity_pr = update_currents('pr', "PeterRoom", current_temperature_pr, current_humidity_pr, 'c')
+end
+
 
