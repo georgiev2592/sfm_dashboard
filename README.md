@@ -1,8 +1,7 @@
 
 sfm_dashboard
-====
-
 > HTTP Server on Ruby Sinatra
+===
 
 Check out http://shopify.github.com/dashing for more information.
 
@@ -26,7 +25,7 @@ $ bundle install
 $ sudo dashing start [-p 80] [-d] [-e development] [-e production]
 ```
 
-Flags:
+> Flags:
 
 	p: specify port
 	d: run in the background as a service
